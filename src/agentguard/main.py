@@ -46,9 +46,9 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         version=__version__,
         description="Policy Firewall & Escrow for Autonomous AI Payments using PayPal",
-        docs_url="/docs" if settings.debug or settings.env != "production" else None,
-        redoc_url="/redoc" if settings.debug or settings.env != "production" else None,
-        openapi_url="/openapi.json" if settings.debug or settings.env != "production" else None,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
         lifespan=lifespan,
     )
 
@@ -61,15 +61,24 @@ def create_app() -> FastAPI:
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
+    # Allow additional custom origins via AGENTGUARD_ALLOWED_ORIGINS environment variable
+    import os
+
+    extra_origins = os.environ.get("AGENTGUARD_ALLOWED_ORIGINS", "")
+    if extra_origins:
+        for origin in extra_origins.split(","):
+            cleaned = origin.strip()
+            if cleaned and cleaned not in allowed_origins:
+                allowed_origins.append(cleaned)
+
+    # Allow localhost and *.onrender.com domains by default
     allowed_origin_regex = (
-        r"^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$"
-        if (settings.debug or settings.env != "production")
-        else None
+        r"^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$|^https:\/\/[a-zA-Z0-9_\-]+\.onrender\.com$"
     )
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=allowed_origins if allowed_origin_regex is None else [],
+        allow_origins=allowed_origins,
         allow_origin_regex=allowed_origin_regex,
         allow_credentials=True,
         allow_methods=["*"],
