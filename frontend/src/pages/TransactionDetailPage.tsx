@@ -25,14 +25,16 @@ export const TransactionDetailPage: React.FC<TransactionDetailPageProps> = ({
 }) => {
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'security' | 'paypal' | 'audit'>('overview');
+
+  const loading = Boolean(transactionId && loadedId !== transactionId);
 
   useEffect(() => {
     if (!transactionId) return;
 
     let mounted = true;
-    setLoading(true);
 
     Promise.all([
       api.getTransaction(transactionId),
@@ -42,13 +44,16 @@ export const TransactionDetailPage: React.FC<TransactionDetailPageProps> = ({
         if (mounted) {
           setTransaction(tx);
           setAuditLogs(logs);
+          setFetchError(null);
+          setLoadedId(transactionId);
         }
       })
-      .catch((err) => {
-        console.error('Failed to load transaction details:', err);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
+      .catch((err: any) => {
+        if (mounted) {
+          setTransaction(null);
+          setFetchError(err?.message || 'Failed to load transaction details.');
+          setLoadedId(transactionId);
+        }
       });
 
     return () => {
@@ -117,7 +122,9 @@ export const TransactionDetailPage: React.FC<TransactionDetailPageProps> = ({
               <p className="text-xs">Fetching cryptographic evidence...</p>
             </div>
           ) : !transaction ? (
-            <div className="py-20 text-center text-slate-400">Transaction not found.</div>
+            <div className="py-20 text-center text-slate-400">
+              {fetchError || 'Transaction not found.'}
+            </div>
           ) : (
             <>
               {/* TAB 1: OVERVIEW */}

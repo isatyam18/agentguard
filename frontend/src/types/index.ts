@@ -5,6 +5,7 @@ export type PaymentStatus =
   | 'EVALUATING'
   | 'BLOCKED'
   | 'REVIEW_REQUIRED'
+  | 'HELD'
   | 'PAYPAL_ORDER_CREATED'
   | 'AUTHORIZED'
   | 'APPROVED_FOR_CAPTURE'

@@ -12,22 +12,59 @@ import type { SecurityStats } from '../types';
 export const SecurityAnalyticsPage: React.FC = () => {
   const [stats, setStats] = useState<SecurityStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadSecurityStats = () => {
+    setLoading(true);
+    setError(null);
     api
       .getSecurity()
       .then((data) => setStats(data))
-      .catch((err) => console.error('Failed to load security analytics:', err))
+      .catch((err: any) => setError(err?.message || 'Failed to load security analytics.'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    let active = true;
+    api
+      .getSecurity()
+      .then((data) => {
+        if (active) setStats(data);
+      })
+      .catch((err: any) => {
+        if (active) setError(err?.message || 'Failed to load security analytics.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (loading || !stats) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64 text-slate-400">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-sm font-medium">Computing adversarial threat telemetry...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="bg-white p-8 rounded-xl border border-rose-200 shadow-xs text-center space-y-3">
+        <p className="text-sm font-semibold text-rose-700">
+          {error || 'Security analytics telemetry is currently unavailable.'}
+        </p>
+        <button
+          onClick={loadSecurityStats}
+          className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -41,13 +78,13 @@ export const SecurityAnalyticsPage: React.FC = () => {
         <div className="space-y-2 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-400/30">
             <Award className="w-3.5 h-3.5 text-blue-400" />
-            Hackathon Verification Benchmark
+            Security Verification Benchmark
           </div>
           <h2 className="text-xl font-bold tracking-tight text-white">
-            100% Defense Against Adversarial Prompt Injection
+            {metrics.prompt_injection_defense_rate}% Defense Against Adversarial Prompt Injection
           </h2>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Evaluated on a comprehensive 30-case adversarial test suite spanning policy overrides, credential harvesting, payment redirection, delimiter evasion, and Unicode obfuscation.
+            Evaluated across {metrics.benchmark_cases_evaluated} adversarial and control scenarios spanning spending cap violations, policy overrides, credential harvesting, payment redirection, and invoice tampering.
           </p>
         </div>
 

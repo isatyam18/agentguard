@@ -15,24 +15,47 @@ import { RiskBadge, StatusBadge } from '../components/common/StatusBadge';
 
 interface OverviewPageProps {
   stats: OverviewStats | null;
+  isLoading: boolean;
+  error: string | null;
+  onRetry: () => void;
   onSelectTransaction: (id: string) => void;
-  onNavigateToApprovals: () => void;
-  onNavigateToTransactions: () => void;
+  onNavigate: (path: string, event?: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({
   stats,
+  isLoading,
+  error,
+  onRetry,
   onSelectTransaction,
-  onNavigateToApprovals,
-  onNavigateToTransactions,
+  onNavigate,
 }) => {
   if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        <div className="text-center space-y-2">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-sm font-medium">Aggregating telemetry from AgentGuard database...</p>
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-64 text-slate-400">
+          <div className="text-center space-y-2">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-sm font-medium">Loading live telemetry from AgentGuard API...</p>
+          </div>
         </div>
+      );
+    }
+
+    return (
+      <div className="bg-white p-8 rounded-xl border border-rose-200 shadow-xs text-center space-y-3">
+        <p className="text-sm font-semibold text-rose-700">
+          {error || 'Unable to retrieve telemetry from the AgentGuard backend API.'}
+        </p>
+        <p className="text-xs text-slate-500">
+          Verify the backend service is awake and reachable, then retry synchronization.
+        </p>
+        <button
+          onClick={onRetry}
+          className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+        >
+          Retry Sync
+        </button>
       </div>
     );
   }
@@ -93,9 +116,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         </div>
 
         {/* 4. Pending Approvals */}
-        <div
-          onClick={onNavigateToApprovals}
-          className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between cursor-pointer hover:border-amber-400 transition-colors group"
+        <a
+          href="/approvals"
+          onClick={(e) => onNavigate('/approvals', e)}
+          className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-amber-400 transition-colors group"
         >
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase tracking-wider">
             <span>Pending Escrow</span>
@@ -110,7 +134,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               <ArrowRight className="w-3 h-3" />
             </div>
           </div>
-        </div>
+        </a>
 
         {/* 5. Total Authorized Escrow */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
@@ -222,7 +246,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 <span>AI Prompt Injection Shield</span>
               </div>
               <p className="text-xs text-slate-600">
-                Deep semantic inspection of invoice notes, line items, and instructions. 100% defense rate on 30 benchmark attack vectors.
+                Deep deterministic and fail-closed semantic inspection of invoice notes, line items, and payment destinations.
               </p>
             </div>
 
@@ -243,13 +267,14 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               <span>•</span>
               <span>SQLite WAL ACID concurrency</span>
             </div>
-            <button
-              onClick={onNavigateToTransactions}
+            <a
+              href="/transactions"
+              onClick={(e) => onNavigate('/transactions', e)}
               className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
             >
               <span>Explore All Transactions</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -259,17 +284,18 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         <div className="p-5 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wide">
-              Live Firewall & Escrow Activity
+              Live Firewall &amp; Escrow Activity
             </h3>
             <p className="text-xs text-slate-500">Most recent transactions evaluated by AgentGuard</p>
           </div>
-          <button
-            onClick={onNavigateToTransactions}
+          <a
+            href="/transactions"
+            onClick={(e) => onNavigate('/transactions', e)}
             className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
           >
             <span>View All</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          </a>
         </div>
 
         <div className="overflow-x-auto">
@@ -290,7 +316,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               {stats.recent_activity.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-slate-400">
-                    No transactions recorded yet. Click "Seed Demo Data" above to populate live hackathon scenarios.
+                    No transactions recorded yet. Submit an MCP agent request or populate sample data using &ldquo;Seed Demo Data&rdquo;.
                   </td>
                 </tr>
               ) : (

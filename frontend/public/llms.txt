@@ -1,0 +1,23 @@
+# AgentGuard
+
+> AgentGuard is a deterministic policy firewall, invoice threat scanner, and two-phase PayPal AUTHORIZE escrow console for autonomous AI payment agents.
+
+AgentGuard sits between autonomous AI buyer agents (connecting via Model Context Protocol) and PayPal payment APIs so untrusted agents cannot bypass spending limits, execute prompt-injected invoices, or settle funds without human verification.
+
+## Core Capabilities
+
+- **Deterministic Policy Engine**: Enforces per-transaction maximum limits, rolling 24-hour spending caps, currency validation, and merchant allowlists in code decoupled from LLM reasoning.
+- **Invoice Threat Scanner**: Verifies line-item arithmetic, flags typosquatted merchant domains and suspicious payment links, and fails closed on adversarial prompt injections.
+- **PayPal Two-Phase AUTHORIZE Escrow**: Creates orders exclusively with `intent: "AUTHORIZE"` so funds are held without automatic capture until approved or voided by an authenticated human operator.
+
+## Console Routes
+
+- [Firewall & Escrow Overview](https://agentguard-frontend-qrs8.onrender.com/): Real-time operational metrics, risk score distribution, and live transaction activity.
+- [Transaction Explorer](https://agentguard-frontend-qrs8.onrender.com/transactions): Searchable audit registry of evaluated purchase requests, firewall decisions, and escrow states.
+- [Human Approval Center](https://agentguard-frontend-qrs8.onrender.com/approvals): Verification queue where human operators capture or void held authorizations.
+- [Policy Management](https://agentguard-frontend-qrs8.onrender.com/policies): Administrative controls for spending caps, velocity budgets, and trusted merchant allowlists.
+- [Security Analytics](https://agentguard-frontend-qrs8.onrender.com/security-analytics): Adversarial threat metrics, blocked attack categories, and risk distribution histograms.
+
+## Source & Documentation
+
+- [GitHub Repository](https://github.com/isatyam18/agentguard): Complete source code, FastAPI backend, MCP gateway, and test suites.

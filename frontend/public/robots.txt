@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://agentguard-frontend-qrs8.onrender.com/sitemap.xml

@@ -20,25 +20,40 @@ export const PolicyManagementPage: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadPolicies();
-  }, []);
+  const applyPolicyData = (data: Policy[]) => {
+    const active = data.find((p) => p.is_active) || data[0];
+    if (active) {
+      setActivePolicy(active);
+      setMaxAmount(active.max_transaction_amount);
+      setDailyLimit(active.daily_spending_limit);
+      setRequireHumanApproval(active.require_human_approval);
+      setMerchants(active.allowed_merchants || []);
+    }
+  };
 
   const loadPolicies = async () => {
     try {
       const data = await api.getPolicies();
-      const active = data.find((p) => p.is_active) || data[0];
-      if (active) {
-        setActivePolicy(active);
-        setMaxAmount(active.max_transaction_amount);
-        setDailyLimit(active.daily_spending_limit);
-        setRequireHumanApproval(active.require_human_approval);
-        setMerchants(active.allowed_merchants || []);
-      }
+      applyPolicyData(data);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to fetch policies.');
     }
   };
+
+  useEffect(() => {
+    let active = true;
+    api
+      .getPolicies()
+      .then((data) => {
+        if (active) applyPolicyData(data);
+      })
+      .catch((err: any) => {
+        if (active) setErrorMsg(err.message || 'Failed to fetch policies.');
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleAddMerchant = () => {
     const val = newMerchantInput.trim().toLowerCase();

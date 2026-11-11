@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import {
-  AllCommunityModule,
+  ClientSideRowModelModule,
   ModuleRegistry,
+  NumberFilterModule,
+  PaginationModule,
+  RowSelectionModule,
+  TextFilterModule,
+  themeQuartz,
 } from 'ag-grid-community';
 import type { ColDef, RowClickedEvent } from 'ag-grid-community';
-
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
 
 import {
   Eye,
@@ -17,7 +19,13 @@ import {
 import { RiskBadge, StatusBadge } from '../components/common/StatusBadge';
 import type { Transaction } from '../types';
 
-ModuleRegistry.registerModules([AllCommunityModule]);
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+  PaginationModule,
+  TextFilterModule,
+  NumberFilterModule,
+  RowSelectionModule,
+]);
 
 interface TransactionExplorerPageProps {
   transactions: Transaction[];
@@ -196,6 +204,7 @@ export const TransactionExplorerPage: React.FC<TransactionExplorerPageProps> = (
 
           {/* Status filter */}
           <select
+            aria-label="Filter by Escrow State"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 font-medium focus:ring-2 focus:ring-blue-500"
@@ -204,6 +213,7 @@ export const TransactionExplorerPage: React.FC<TransactionExplorerPageProps> = (
             <option value="CAPTURED">CAPTURED</option>
             <option value="AUTHORIZED">AUTHORIZED</option>
             <option value="REVIEW_REQUIRED">REVIEW REQUIRED</option>
+            <option value="HELD">HELD</option>
             <option value="BLOCKED">BLOCKED</option>
             <option value="VOIDED">VOIDED</option>
           </select>
@@ -217,8 +227,9 @@ export const TransactionExplorerPage: React.FC<TransactionExplorerPageProps> = (
 
       {/* AG Grid Container */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="ag-theme-quartz w-full h-[620px]">
+        <div className="w-full h-[620px]">
           <AgGridReact
+            theme={themeQuartz}
             rowData={filteredData}
             columnDefs={columnDefs}
             defaultColDef={{
@@ -231,7 +242,7 @@ export const TransactionExplorerPage: React.FC<TransactionExplorerPageProps> = (
             paginationPageSizeSelector={[10, 15, 25, 50]}
             onRowClicked={onRowClicked}
             loading={isLoading}
-            rowSelection="single"
+            rowSelection={{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }}
           />
         </div>
       </div>
