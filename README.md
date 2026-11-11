@@ -230,25 +230,7 @@ To test against PayPal's actual Sandbox:
 
 ---
 
-## 10. Running Tests & Verifications
-
-```bash
-# 1. Run full test suite
-pytest -v
-
-# 2. Run the 22-scenario Security Evaluation Benchmark
-python scripts/run_security_benchmark.py
-
-# 3. Run the End-to-End Integration Verification
-python scripts/run_integration_verification.py
-
-# 4. Check for credential leaks
-yuntra scan
-```
-
----
-
-## 11. Known Prototype Limitations
+## 10. Known Prototype Limitations
 
 - **Single-instance SQLite**: The database uses local SQLite in WAL mode. High-concurrency production deployments require PostgreSQL with row-level locking.
 - **In-process mutexes**: Concurrency locks use `threading.Lock`. Clustered multi-node deployments require distributed locking (such as Redis Redlock).
@@ -257,15 +239,6 @@ yuntra scan
 
 ---
 
-## 12. Documentation Links
-
-- [System Architecture](docs/ARCHITECTURE.md)
-- [Architectural Decision Records (ADRs)](docs/DECISIONS.md)
-- [Security Evaluation Framework](docs/EVALUATION.md)
-- [Integration Verification Report](docs/FINAL_VERIFICATION.md)
-
----
-
-## 13. License
+## 11. License
 
 This project is licensed under the [MIT License](LICENSE).
